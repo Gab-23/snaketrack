@@ -20,13 +20,14 @@ def apply_changes(stripped_lines, category, **diffs):
             for idx in range_idxs:                                                              # iterate
                 # modify lines and store in dictionary
                 modified_line = modify_line(stripped_lines[idx].replace('\"',''), category, diffs)
+                # todo: keep track of variables being assigned
                 input_output_log_dic[idx] = "\t" + '\"' + modified_line + '\"' + "\n"
         else:
             pass
     return input_output_log_dic
     
 def modify_line(string, category, diffs):
-    # category = track_changes(old_string, new_string)
+    # todo: category = track_changes(old_string, new_string)
     if category == None:
         return string
     elif category == "add_wildcard":
@@ -49,9 +50,11 @@ def modify_line(string, category, diffs):
             return string_new
         else:
             raise ValueError(f"oldPattern [{len(olds)} elements] and newPattern [{len(news)} elements] have different lengths")
-    elif category == "update_filename":
-        pass
-        
+    elif category == "modify_filename":
+        old = diffs["oldName"]
+        new = diffs["newName"]
+        string_new = string.replace(old, new) 
+        return string_new
     
 def update_lines(lines, input_output_log_dic):
     for idx in range(len(lines)):                                                               # for each line
