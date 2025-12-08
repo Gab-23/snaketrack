@@ -1,4 +1,5 @@
 import os
+import re
 import argparse
 from helpers import * 
 
@@ -36,7 +37,7 @@ if category != "add_wildcard":
         write_rule(lines_updated, args.outputDir, rule_basename)
         
 else:
-    #dependencies = track_dependencies(rules_paths, lowerBound)
+    dependencies = track_dependencies(rules_paths, rules_basenames, category, lowerBound)
     #for idx in range(len(dependencies)):                                              # scan rulesDir
     #    dependency_path = dependencies[idx]
     #    dependency_basename = ...
