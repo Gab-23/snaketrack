@@ -7,36 +7,62 @@ def parse_input(rule):
             stripped_lines.append(stripped_line)
     return [lines, stripped_lines]
     
-def track_dependencies(rules_paths, rules_basenames, category, lowerBound):
+def get_ranges(headers, io): 
+    start_idx = [x[1] + 1 for x in headers if io == x[0]][0]                               
+    end_idx = headers[[headers.index(x) + 1 for x in headers if io == x[0]][0]][1]         
+    range_idxs = range(start_idx, end_idx)
+    return range_idxs
+    
+def get_input_output(rules_paths, rules_basenames):
     import re
-    input_pool = set()
-    output_pool = set()
+    input_pool = set()                                                                              # initialize input set
+    output_pool = set()                                                                             # initialize output set
+    rules_dic = {}
     for idx in range(len(rules_paths)):                                                             # scan rulesDir
         rule_path = rules_paths[idx]
         rule_basename = rules_basenames[idx]
-        print(f'[log: Tracking dependencies {rule_path} ]')
         lines, stripped_lines = parse_input(rule_path)
         headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                 
         input_output = ["output:","input:"]                                                     
         input_output_dic = {}
         for io in input_output:
-            input_output_dic[io] = []
+            input_output_dic[io] = []                                                               # each rule starts with empty io
             if io in [x[0] for x in headers]:                                                        
-                start_idx = [x[1] + 1 for x in headers if io == x[0]][0]                               
-                end_idx = headers[[headers.index(x) + 1 for x in headers if io == x[0]][0]][1]         
-                range_idxs = range(start_idx, end_idx)                                                  
+                range_idxs = get_ranges(headers, io)                                        
                 for idx in range_idxs:
-                    to_append = re.sub(r"(.*?)=", "", stripped_lines[idx]).replace(",", "")
+                    to_append = re.sub(r"(.*?)=", "", stripped_lines[idx]).replace(",", "")         # remove variable assignment
                     input_output_dic[io].append(to_append)
                     if io == "input:":
-                        print(to_append)
-                        input_pool.add(to_append)
+                        input_pool.add(to_append)                                                   # add everything to io pool
                     else:
                         output_pool.add(to_append)
-                                                                                                    
-    print(input_pool)
-    print(output_pool)
-    return input_output_dic
+        rules_dic[rule_basename] = input_output_dic
+    return([input_pool, output_pool, rules_dic])
+    
+def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
+    dependency_chain.append(rule_basename)
+    current_outputs = dic["output:"]
+    dependencies = [k for k,v in rules_dic.items() for x in v["input:"] if x in current_outputs]
+    if len(dependencies) == 0:
+        return dependency_chain
+    else:
+        return sort_dependencies(dependencies[0], rules_dic[dependencies[0]], rules_dic, dependency_chain)
+    # TODO: handle branching
+    # TODO: handle rules without dependencies
+    
+def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
+    input_pool, output_pool, rules_dic = get_input_output(rules_paths, rules_basenames)
+    dependency_chain = []
+    if upperBound == []:
+        starting_rules = {rule:dependencies for rule,dependencies in rules_dic.items() if (dependencies["input:"] == [] or all(x not in output_pool for x in dependencies["input:"]))}
+    else:
+        starting_rules = {rule:dependencies for rule,dependencies in rules_dic.items() if rule == upperBound}
+    for rulename, dic in starting_rules.items():
+        dependency_chain = sort_dependencies(rulename, dic, rules_dic, dependency_chain)
+        if lowerBound == []:
+            return dependency_chain[:]
+        else:
+            return dependency_chain[:(dependency_chain.index(lowerBound)+1)]
     
 def apply_changes(stripped_lines, category, **diffs):
     headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                     # get headers of snakemake rule, list of tuples with (name, index)
@@ -44,9 +70,7 @@ def apply_changes(stripped_lines, category, **diffs):
     input_output_log_dic = {}                                                                       # initialize empty dict
     for iol in input_output_log:                                                                    # for each iol header
         if iol in [x[0] for x in headers]:                                                          # some rules might miss some of these headers
-            start_idx = [x[1] + 1 for x in headers if iol == x[0]][0]                               # the start index of files is the next index of the header
-            end_idx = headers[[headers.index(x) + 1 for x in headers if iol == x[0]][0]][1]         # the end index of files is the index of the next header
-            range_idxs = range(start_idx, end_idx)                                                  # define range of lines where filenames are
+            range_idxs = get_ranges(headers, iol)                                                   # define range of lines where filenames are
             for idx in range_idxs:                                                                  # iterate
                 # modify lines and store in dictionary
                 modified_line = modify_line(stripped_lines[idx], category, diffs)
@@ -60,8 +84,7 @@ def modify_line(string, category, diffs):
     if category == None:
         return string
     elif category == "add_wildcard":
-        # check for wildcard
-        pass
+        return "i am here"
     elif category == "remove_wildcard":
         # check for wildcard
         for diff in diffs["oldPattern"]:
