@@ -48,13 +48,13 @@ def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
     else:
         return sort_dependencies(dependencies[0], rules_dic[dependencies[0]], rules_dic, dependency_chain)
     # TODO: handle branching
-    # TODO: handle rules without dependencies
+    # TODO: handle exceptions
     
 def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
     input_pool, output_pool, rules_dic = get_input_output(rules_paths, rules_basenames)
     dependency_chain = []
     if upperBound == []:
-        starting_rules = {rule:dependencies for rule,dependencies in rules_dic.items() if (dependencies["input:"] == [] or all(x not in output_pool for x in dependencies["input:"]))}
+        return rules_basenames
     else:
         starting_rules = {rule:dependencies for rule,dependencies in rules_dic.items() if rule == upperBound}
     for rulename, dic in starting_rules.items():
