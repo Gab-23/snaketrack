@@ -93,12 +93,13 @@ def modify_line(string, category, diffs):
         return string
     elif category == "add_wildcard":
         # check for wildcard
+        string_old = string
         for diff in diffs["newPattern"]:
-            string_new = add_wildcard(string, diff)
-        if string != string_new:
-            print(f'[log: << {string} ]')
-            print(f'[log: >> {string_new} ]')
-        return string_new
+            string = add_wildcard(string, diff)
+        if string != string_old:
+            print(f'[log: << {string_old} ]')
+            print(f'[log: >> {string} ]')
+        return string
     elif category == "remove_wildcard":
         # check for wildcard
         for diff in diffs["oldPattern"]:

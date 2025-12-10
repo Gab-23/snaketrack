@@ -1,12 +1,12 @@
 rule get_TSSs:
 	output:
-		"resources/reference_data/gencode/{ciao}_{assembly_code}_v{gencode_version}_{tss_subset}.bed"
+		"resources/reference_data/gencode/{ciao2}_{ciao}_{assembly_code}_v{gencode_version}_{tss_subset}.bed"
 	input:
-		"resources/reference_data/gencode/{ciao}_gencode.v{gencode_version}.annotation.gff3.gz"
+		"resources/reference_data/gencode/{ciao2}_{ciao}_gencode.v{gencode_version}.annotation.gff3.gz"
 	conda:
 		"../envs/r_TSSs.yml"
 	log:
-		"logs/get_TSSs/{ciao}_get_TSSs_{assembly_code}_v{gencode_version}_{tss_subset}.log"
+		"logs/get_TSSs/{ciao2}_{ciao}_get_TSSs_{assembly_code}_v{gencode_version}_{tss_subset}.log"
 	shell:
     	"""
     	Rscript workflow/scripts/get_TSSs.R \
