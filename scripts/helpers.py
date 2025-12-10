@@ -78,13 +78,27 @@ def apply_changes(stripped_lines, category, **diffs):
         else:
             pass
     return input_output_log_dic
-    
+
+def add_wildcard(string, diff):
+    parts = string.split("/")
+    basename = parts[-1]
+    basename = diff + "_" + basename
+    parts[-1] = basename
+    return "/".join(parts)
+
+
 def modify_line(string, category, diffs):
     # todo: category = track_changes(old_string, new_string)
     if category == None:
         return string
     elif category == "add_wildcard":
-        return "i am here"
+        # check for wildcard
+        for diff in diffs["newPattern"]:
+            string_new = add_wildcard(string, diff)
+        if string != string_new:
+            print(f'[log: << {string} ]')
+            print(f'[log: >> {string_new} ]')
+        return string_new
     elif category == "remove_wildcard":
         # check for wildcard
         for diff in diffs["oldPattern"]:
