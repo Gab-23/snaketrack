@@ -47,7 +47,6 @@ def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
         return dependency_chain
     else:
         return sort_dependencies(dependencies[0], rules_dic[dependencies[0]], rules_dic, dependency_chain)
-    # TODO: handle branching
     # TODO: handle exceptions
     
 def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
@@ -64,7 +63,7 @@ def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
         else:
             return dependency_chain[:(dependency_chain.index(lowerBound)+1)]
     
-def apply_changes(stripped_lines, category, **diffs):
+def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, verbose, **diffs):
     headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                     # get headers of snakemake rule, list of tuples with (name, index)
     input_output_log = ["output:","input:", "log:"]                                                 # define input, output, log headers
     input_output_log_dic = {}                                                                       # initialize empty dict
@@ -72,9 +71,15 @@ def apply_changes(stripped_lines, category, **diffs):
         if iol in [x[0] for x in headers]:                                                          # some rules might miss some of these headers
             range_idxs = get_ranges(headers, iol)                                                   # define range of lines where filenames are
             for idx in range_idxs:                                                                  # iterate
-                # modify lines and store in dictionary
-                modified_line = modify_line(stripped_lines[idx], category, diffs)
-                input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
+                if len(range_idxs) > 1 and iol == "input:":                                         # if there is more than one input
+                    if list(prev_input_output_dic.values())[0]["output:"][0] in stripped_lines[idx]:
+                        modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
+                        input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
+                    else:
+                        input_output_log_dic[idx] = "\t" + "\t" + stripped_lines[idx] + "\n"
+                else:                                                                               # modify lines and store in dictionary
+                    modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
+                    input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
         else:
             pass
     return input_output_log_dic
@@ -87,29 +92,31 @@ def add_wildcard(string, diff):
     return "/".join(parts)
 
 
-def modify_line(string, category, diffs):
-    # todo: category = track_changes(old_string, new_string)
+def modify_line(string, category, verbose, diffs):
+    #TODO: category = track_changes(old_string, new_string)
     if category == None:
         return string
     elif category == "add_wildcard":
-        # check for wildcard
+        #TODO: check for wildcard
         string_old = string
         for diff in diffs["newPattern"]:
             string = add_wildcard(string, diff)
-        if string != string_old:
-            print(f'[log: << {string_old} ]')
-            print(f'[log: >> {string} ]')
+        if verbose:
+            if string != string_old:
+                print(f'[log: << {string_old} ]')
+                print(f'[log: >> {string} ]')
         return string
     elif category == "remove_wildcard":
-        # check for wildcard
+        #TODO: check for wildcard
         for diff in diffs["oldPattern"]:
             string_new = string.replace(diff, "")
-        if string != string_new:
-            print(f'[log: << {string} ]')
-            print(f'[log: >> {string_new} ]')
+        if verbose:
+            if string != string_new:
+                print(f'[log: << {string} ]')
+                print(f'[log: >> {string_new} ]')
         return string_new
     elif category == "modify_wildcard":
-        # check for wildcard
+        #TODO: check for wildcard
         olds = diffs["oldPattern"]
         news = diffs["newPattern"]
         if len(olds) == len(news):
@@ -117,9 +124,10 @@ def modify_line(string, category, diffs):
                 old = diffs["oldPattern"][idx]
                 new = diffs["newPattern"][idx]
                 string_new = string.replace(old, new)
-            if string != string_new:
-                print(f'[log: << {string} ]')
-                print(f'[log: >> {string_new} ]')
+            if verbose:
+                if string != string_new:
+                    print(f'[log: << {string} ]')
+                    print(f'[log: >> {string_new} ]')
             return string_new
         else:
             raise ValueError(f"oldPattern [{len(olds)} elements] and newPattern [{len(news)} elements] have different lengths")
@@ -127,9 +135,10 @@ def modify_line(string, category, diffs):
         old = diffs["oldName"]
         new = diffs["newName"]
         string_new = string.replace(old, new)
-        if string != string_new:
-            print(f'[log: << {string} ]')
-            print(f'[log: >> {string_new} ]')
+        if verbose:
+            if string != string_new:
+                print(f'[log: << {string} ]')
+                print(f'[log: >> {string_new} ]')
         return string_new
     
 def update_lines(lines, input_output_log_dic):
