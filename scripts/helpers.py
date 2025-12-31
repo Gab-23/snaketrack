@@ -47,7 +47,7 @@ def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
         return dependency_chain
     else:
         return sort_dependencies(dependencies[0], rules_dic[dependencies[0]], rules_dic, dependency_chain)
-    # TODO: handle exceptions
+
     
 def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
     input_pool, output_pool, rules_dic = get_input_output(rules_paths, rules_basenames)
@@ -102,7 +102,6 @@ def is_wildcard(diff):
         return False
     
 def modify_line(string, category, verbose, diffs):
-    #TODO: category = track_changes(old_string, new_string)
     if category == None:
         return string
     elif category == "add_wildcard":
@@ -175,3 +174,6 @@ def write_rule(lines_updated, outputDir, ruleName):
     with open(outputPath, "w") as f:                                                       
         for line in lines_updated:
             f.write(line)
+            
+# TODO: handle exceptions
+# TODO: category = track_changes(old_string, new_string)
