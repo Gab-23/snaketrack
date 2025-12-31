@@ -91,39 +91,59 @@ def add_wildcard(string, diff):
     parts[-1] = basename
     return "/".join(parts)
 
-
+def is_wildcard(diff):
+    bool_1 = type(diff) == str
+    bool_2 = diff[0] == "{"
+    bool_3 = diff[-1] == "}"
+    bool_4 = '"' not in diff
+    if bool_1 and bool_2 and bool_3 and bool_4:
+        return True
+    else:
+        return False
+    
 def modify_line(string, category, verbose, diffs):
     #TODO: category = track_changes(old_string, new_string)
     if category == None:
         return string
     elif category == "add_wildcard":
-        #TODO: check for wildcard
-        string_old = string
         for diff in diffs["newPattern"]:
-            string = add_wildcard(string, diff)
+            if is_wildcard(diff):
+                string_new = add_wildcard(string, diff)
+            else:
+                raise ValueError(f"{diff} is not a properly formatted wildcard!")
         if verbose:
-            if string != string_old:
-                print(f'[log: << {string_old} ]')
-                print(f'[log: >> {string} ]')
-        return string
+            if string != string_new:
+                print(f'[log: << {string} ]')
+                print(f'[log: >> {string_new} ]')
+        return string_new
     elif category == "remove_wildcard":
-        #TODO: check for wildcard
         for diff in diffs["oldPattern"]:
-            string_new = string.replace(diff, "")
+            if is_wildcard(diff):
+                string_new = string.replace(diff, "")
+            else:
+                raise ValueError(f"{diff} is not a properly formatted wildcard!")
         if verbose:
             if string != string_new:
                 print(f'[log: << {string} ]')
                 print(f'[log: >> {string_new} ]')
         return string_new
     elif category == "modify_wildcard":
-        #TODO: check for wildcard
         olds = diffs["oldPattern"]
         news = diffs["newPattern"]
         if len(olds) == len(news):
             for idx in range(len(diffs["oldPattern"])):
                 old = diffs["oldPattern"][idx]
+                bool_old = is_wildcard(old)
                 new = diffs["newPattern"][idx]
-                string_new = string.replace(old, new)
+                bool_new = is_wildcard(new)
+                if bool_old and bool_new:
+                    string_new = string.replace(old, new)
+                elif bool_old and not bool_new:
+                    raise ValueError(f"{new} is not a properly formatted wildcard!")
+                elif bool_new and not bool_old:
+                    raise ValueError(f"{old} is not a properly formatted wildcard!")
+                else:
+                    raise ValueError(f"{old} and {new} are not properly formatted wildcards!")
             if verbose:
                 if string != string_new:
                     print(f'[log: << {string} ]')

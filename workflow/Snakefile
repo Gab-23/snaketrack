@@ -11,36 +11,9 @@ include: "rules/filter_TSSs.smk"
 
 include: "rules/filter_counts_new.smk"
 
-include: "rules/get_mappability.smk"
-include: "rules/filter_mappability.smk"
-include: "rules/filter_CpGs_by_mappability.smk"
-include: "rules/sort_CpGs.smk"
-
-include: "rules/get_K_closest_CpGs.smk"
-
-include: "rules/xgb_input.smk"
-
-include: "rules/train_models.smk"
-include: "rules/generate_feature_heatmap.smk"
-
-include: "rules/aggregate_models_output.smk"
-include: "rules/extract_CpGs_from_output.smk"
-include: "rules/generate_genome_tracks.smk"
-include: "rules/plot_models_output.smk"
-
-include: "rules/get_chrom_sizes.smk"
-include: "rules/clean_chrom_sizes.smk"
-include: "rules/slop_TSSs.smk"
-include: "rules/generate_ini_file.smk"
-include: "rules/plot_genome_tracks.smk"
-include: "rules/prepare_TSSs_to_plot_tracks.smk"
-
-include: "rules/garbage_collector.smk"
-
 sender = config["sender"][0]
 app_password = config["app_password"][0]
 recipients = config["recipients"]
-
 
 assembly_codes = config["assembly_codes"]
 gencode_versions = config["gencode_versions"]
@@ -66,8 +39,6 @@ rule all:
             minCount_expr=minCount_exprs,
             minSamples_expr=minSamples_exprs
         )
-
-
 
 def txids_from_checkpoint(wildcards):
     """Return list of TxIDs from checkpoint output (cached)."""

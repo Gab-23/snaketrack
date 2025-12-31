@@ -47,3 +47,9 @@ for idx in range(len(dependencies)):
     input_output_log_dic = get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, verbose, oldPattern = oldPattern, newPattern = newPattern, oldName = oldName, newName = newName)
     lines_updated = update_lines(lines, input_output_log_dic)
     write_rule(lines_updated, args.outputDir, dependency_basename)
+
+new_rules_basenames = os.listdir(args.outputDir)
+new_rules_paths = [args.outputDir + x for x in rules_basenames]
+new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, upperBound, lowerBound)
+exit_code = 1 - (dependencies == new_dependencies)
+exit(exit_code)
