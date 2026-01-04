@@ -7,7 +7,7 @@ def parse_input(rule):
             stripped_lines.append(stripped_line)
     return [lines, stripped_lines]
     
-def get_ranges(headers, io): 
+def get_ranges(headers, io):                                                                        # get index from header to next header
     start_idx = [x[1] + 1 for x in headers if io == x[0]][0]                               
     end_idx = headers[[headers.index(x) + 1 for x in headers if io == x[0]][0]][1]         
     range_idxs = range(start_idx, end_idx)
@@ -42,7 +42,7 @@ def get_input_output(rules_paths, rules_basenames):
 def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
     dependency_chain.append(rule_basename)
     current_outputs = dic["output:"]
-    dependencies = [k for k,v in rules_dic.items() for x in v["input:"] if x in current_outputs]
+    dependencies = [k for k,v in rules_dic.items() for x in v["input:"] if x in current_outputs]    # recursively look for a rule with input = to other rule output
     if len(dependencies) == 0:
         return dependency_chain
     else:
@@ -70,14 +70,15 @@ def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, ve
     for iol in input_output_log:                                                                    # for each iol header
         if iol in [x[0] for x in headers]:                                                          # some rules might miss some of these headers
             range_idxs = get_ranges(headers, iol)                                                   # define range of lines where filenames are
-            for idx in range_idxs:                                                                  # iterate
-                if len(range_idxs) > 1 and iol == "input:":                                         # if there is more than one input
-                    if list(prev_input_output_dic.values())[0]["output:"][0] in stripped_lines[idx]:
+            if len(range_idxs) > 1 and iol == "input:":                                             # if there is more than one input
+                for idx in range_idxs:                                                              # iterate
+                    if any([x in stripped_lines[idx] for x in list(prev_input_output_dic.values())[0]["output:"]]):
                         modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
                         input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
                     else:
                         input_output_log_dic[idx] = "\t" + "\t" + stripped_lines[idx] + "\n"
-                else:                                                                               # modify lines and store in dictionary
+            else:                                                                                   # modify lines and store in dictionary
+                for idx in range_idxs:
                     modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
                     input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
         else:

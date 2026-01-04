@@ -4,16 +4,16 @@ import argparse
 from helpers import * 
 
 parser = argparse.ArgumentParser()  
-parser.add_argument('--rulesDir',      dest='rulesDir',                      required=True,    type=str,    help='Add rulesDir')
-parser.add_argument('--outputDir',     dest='outputDir',                     required=True,    type=str,    help='Add outputDir')
-parser.add_argument('--change',        dest='change',                                          type=str,    help='Add change')
-parser.add_argument('--oldPattern',    dest='oldPattern',    nargs = "*",                      type=str,    help='Add oldPattern')
-parser.add_argument('--newPattern',    dest='newPattern',    nargs = "*",                      type=str,    help='Add newPattern')
-parser.add_argument('--oldName',       dest='oldName',       nargs = "?",                      type=str,    help='Add oldName')
-parser.add_argument('--newName',       dest='newName',       nargs = "?",                      type=str,    help='Add newName')
-parser.add_argument('--lowerBound',    dest='lowerBound',    nargs = "?",                      type=str,    help='Add lowerBound')
-parser.add_argument('--upperBound',    dest='upperBound',    nargs = "?",                      type=str,    help='Add upperBound')
-parser.add_argument('--verbose',       dest='verbose',                                                      help='Add verbose',         action="store_true")
+parser.add_argument('--rulesDir',      dest='rulesDir',                      required=True,                  type=str,    help='Add rulesDir')
+parser.add_argument('--outputDir',     dest='outputDir',                     required=True,                  type=str,    help='Add outputDir')
+parser.add_argument('--change',        dest='change',                                                        type=str,    help='Add change')
+parser.add_argument('--oldPattern',    dest='oldPattern',    nargs = "*",                                    type=str,    help='Add oldPattern')
+parser.add_argument('--newPattern',    dest='newPattern',    nargs = "*",                                    type=str,    help='Add newPattern')
+parser.add_argument('--oldName',       dest='oldName',       nargs = "?",                                    type=str,    help='Add oldName')
+parser.add_argument('--newName',       dest='newName',       nargs = "?",    required=True,                  type=str,    help='Add newName')
+parser.add_argument('--lowerBound',    dest='lowerBound',    nargs = "?",    required=True,                  type=str,    help='Add lowerBound')
+parser.add_argument('--upperBound',    dest='upperBound',    nargs = "?",                                    type=str,    help='Add upperBound')
+parser.add_argument('--verbose',       dest='verbose',                                                                    help='Add verbose',         action="store_true")
 
 args = parser.parse_args()
 
@@ -51,5 +51,6 @@ for idx in range(len(dependencies)):
 new_rules_basenames = os.listdir(args.outputDir)
 new_rules_paths = [args.outputDir + x for x in rules_basenames]
 new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, upperBound, lowerBound)
+print(new_dependencies)
 exit_code = 1 - (dependencies == new_dependencies)
 exit(exit_code)
