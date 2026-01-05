@@ -151,7 +151,7 @@ def modify_line(string, category, verbose, diffs):
             return string_new
         else:
             raise ValueError(f"oldPattern [{len(olds)} elements] and newPattern [{len(news)} elements] have different lengths")
-    elif category == "modify_filename":
+    elif category == "modify_filename":                                                         # TODO: change logic here
         old = diffs["oldName"]
         new = diffs["newName"]
         string_new = string.replace(old, new)
@@ -177,14 +177,4 @@ def write_rule(lines_updated, outputDir, ruleName):
             f.write(line)
             
 # TODO: handle exceptions
-# TODO: category = track_changes(old_string, new_string)
-# using difflib 
-# track steps to go from old_string to new_string
-# track the wildcards and compare with signatures:
-#   
-#   +{      -{       {      
-#   +a      -a      -a
-#   +a      -a      -a
-#   +}      -}      +b
-#                   +b
-#                    }
+

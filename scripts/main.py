@@ -54,3 +54,7 @@ new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, uppe
 print(new_dependencies)
 exit_code = 1 - (dependencies == new_dependencies)
 exit(exit_code)
+
+
+#TODO: improve logic with simple name substitution
+#      no dependency tracking in that case, no need for boundaries
