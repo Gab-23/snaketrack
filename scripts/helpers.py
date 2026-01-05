@@ -178,3 +178,13 @@ def write_rule(lines_updated, outputDir, ruleName):
             
 # TODO: handle exceptions
 # TODO: category = track_changes(old_string, new_string)
+# using difflib 
+# track steps to go from old_string to new_string
+# track the wildcards and compare with signatures:
+#   
+#   +{      -{       {      
+#   +a      -a      -a
+#   +a      -a      -a
+#   +}      -}      +b
+#                   +b
+#                    }
