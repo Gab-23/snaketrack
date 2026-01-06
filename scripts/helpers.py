@@ -96,8 +96,10 @@ def is_wildcard(diff):
     bool_1 = type(diff) == str
     bool_2 = diff[0] == "{"
     bool_3 = diff[-1] == "}"
-    bool_4 = '"' not in diff
-    if bool_1 and bool_2 and bool_3 and bool_4:
+    bool_4 = diff.count("{") == 1
+    bool_5 = diff.count("}") == 1
+    bool_6 = '"' not in diff
+    if bool_1 and bool_2 and bool_3 and bool_4 and bool_5 and bool_6:
         return True
     else:
         return False
@@ -151,7 +153,7 @@ def modify_line(string, category, verbose, diffs):
             return string_new
         else:
             raise ValueError(f"oldPattern [{len(olds)} elements] and newPattern [{len(news)} elements] have different lengths")
-    elif category == "modify_filename":                                                         # TODO: change logic here
+    elif category == "modify_filename":
         old = diffs["oldName"]
         new = diffs["newName"]
         string_new = string.replace(old, new)
@@ -177,4 +179,3 @@ def write_rule(lines_updated, outputDir, ruleName):
             f.write(line)
             
 # TODO: handle exceptions
-

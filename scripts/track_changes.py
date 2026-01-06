@@ -13,9 +13,23 @@ def identify_wildcards(values, ranges, cumulative_idx = 0):
         values = values[break_idx:]
         return identify_wildcards(values, ranges, cumulative_idx)
 
-def track_changes(oldString, newString):
+def get_comp_ranges(ranges):
+    lower = [x[0] for x in ranges]
+    upper = [x[1] for x in ranges]
+    init_idx = 0
+    comp_ranges = []
+    for idx in range(len(lower)):
+        if idx == init_idx:
+            comp_range = (init_idx,lower[idx])
+            comp_ranges.append(comp_range)
+        else:
+            comp_range = (upper[idx-1],lower[idx])
+            comp_ranges.append(comp_range)
+    return comp_ranges
+
+def track_changes(oldName, newName):
     import difflib
-    change_tracker = difflib.ndiff(oldString, newString)                        # track differences between the two strings
+    change_tracker = difflib.ndiff(oldName, newName)                            # track differences between the two strings
     types = []                                                                  # initialize empty lists
     values = []
     for index, element in enumerate(change_tracker):                            # iterate over the differences
@@ -24,7 +38,8 @@ def track_changes(oldString, newString):
         types.append(category)
         value = change_report[2]                                                # value is the third element of the list
         values.append(value)
-    
+    print(types)
+    print(values)
     ranges = identify_wildcards(values, [])                                     # track changes for identification of wildcards
     categories = []
     diffs_list = []
@@ -34,47 +49,62 @@ def track_changes(oldString, newString):
         values_subset = values[range[0]:range[1]]
         old = "".join([values_subset[idx] for idx,elem in enumerate(types_subset) if elem == " " or elem == "-"])
         new = "".join([values_subset[idx] for idx,elem in enumerate(types_subset) if elem == " " or elem == "+"])
-        old_count_bool = old.count("{") == old.count("}")
-        new_count_bool = new.count("{") == new.count("}")
-        if old_count_bool and new_count_bool:
-            print(old)
-            print(new)
-            unique_changes = set(types_subset)                                   # take the unique set of changes
-            bool_add = "+" in unique_changes
-            bool_remove = "-" in unique_changes
-            if  bool_add and bool_remove:
+        unique_changes = set(types_subset)                                      # take the unique set of changes
+        bool_add = "+" in unique_changes
+        bool_remove = "-" in unique_changes
+        if  bool_add and bool_remove:
+            old_count_bool = old.count("{") == old.count("}")
+            new_count_bool = new.count("{") == new.count("}")
+            if old_count_bool and new_count_bool:
                 category = "modify_wildcard"
                 diffs["oldPattern"] = [old]
                 diffs["newPattern"] = [new]
-            elif bool_add and not bool_remove:
+            elif new_count_bool and not old_count_bool:
+                raise ValueError(f"Broken wildcard detected in {old}")
+            elif old_count_bool and not new_count_bool:
+                raise ValueError(f"Broken wildcard detected in {new}")
+        elif bool_add and not bool_remove:
+            new_count_bool = new.count("{") == new.count("}")
+            if new_count_bool:
                 category = "add_wildcard"
                 diffs["newPattern"] = [new]
-            elif bool_remove and not bool_add:
+            else:
+                raise ValueError(f"Broken wildcard detected in {new}")
+        elif bool_remove and not bool_add:
+            old_count_bool = old.count("{") == old.count("}")
+            if old_count_bool:
                 category = "remove_wildcard"
                 diffs["oldPattern"] = [old]
             else:
-                category = None
-            categories.append(category)
-            diffs_list.append(diffs)
-        elif new_count_bool and not old_count_bool:
-            raise ValueError(f"Broken wildcard detected in {old}")
-        elif old_count_bool and not new_count_bool:
-            raise ValueError(f"Broken wildcard detected in {new}")
-        print(values)
-        print(types)
+                raise ValueError(f"Broken wildcard detected in {old}")
+        else:
+            category = None
+        categories.append(category)
+        diffs_list.append(diffs)
+    comp_ranges = get_comp_ranges(ranges)
+    for comp_range in comp_ranges:
+        comp_types_subset = types[comp_range[0]:comp_range[1]]
+        comp_values_subset = values[comp_range[0]:comp_range[1]]
+        comp_string = "".join([comp_values_subset[idx] for idx,elem in enumerate(comp_types_subset)])
+        print(comp_string)
+        bool_opening = "{" in comp_string
+        bool_closing = "}" in comp_string
+        if bool_opening or bool_closing:
+            raise ValueError(f"Broken wildcard detected in {comp_string}")
+        
 
-
-oldString = "file1_{aa}"
-newString = "file2_{cv_{bc}"
+oldString = "varA=file1_}_{aa}_{cc}"
+newString = "varA=file1__{aa}_{cc}"
 track_changes(oldString, newString)
-
-# TODO: handle exceptions:
-#       check for wildcards changes
-#       handle non wildcards changes
-#       log to user the changes
-#       handle case of { or } in {}         --> broken wildcard exception
-
-
 
 # for sort dag and refactor dag: 
 #   reuse these functions to detect wildcards and to track changes
+#   define the string as a class
+#   class DependencyString
+#       contains: 
+            # wc ranges
+            # non wc ranges
+            # function to convert
+            # function to sort
+            # function to refactor
+            # function to add, modify and remove in class
