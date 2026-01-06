@@ -110,7 +110,7 @@ def modify_line(string, category, verbose, diffs):
             if is_wildcard(diff):
                 string_new = add_wildcard(string, diff)
             else:
-                raise ValueError(f"{diff} is not a properly formatted wildcard!")
+                raise NameError(f"{diff} is not a properly formatted wildcard!")
         if verbose:
             if string != string_new:
                 print(f'[log: << {string} ]')
@@ -121,7 +121,7 @@ def modify_line(string, category, verbose, diffs):
             if is_wildcard(diff):
                 string_new = string.replace(diff, "")
             else:
-                raise ValueError(f"{diff} is not a properly formatted wildcard!")
+                raise NameError(f"{diff} is not a properly formatted wildcard!")
         if verbose:
             if string != string_new:
                 print(f'[log: << {string} ]')
@@ -139,11 +139,11 @@ def modify_line(string, category, verbose, diffs):
                 if bool_old and bool_new:
                     string_new = string.replace(old, new)
                 elif bool_old and not bool_new:
-                    raise ValueError(f"{new} is not a properly formatted wildcard!")
+                    raise NameError(f"{new} is not a properly formatted wildcard!")
                 elif bool_new and not bool_old:
-                    raise ValueError(f"{old} is not a properly formatted wildcard!")
+                    raise NameError(f"{old} is not a properly formatted wildcard!")
                 else:
-                    raise ValueError(f"{old} and {new} are not properly formatted wildcards!")
+                    raise NameError(f"{old} and {new} are not properly formatted wildcards!")
             if verbose:
                 if string != string_new:
                     print(f'[log: << {string} ]')
