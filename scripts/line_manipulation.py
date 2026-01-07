@@ -1,68 +1,11 @@
-def parse_input(rule):
-    stripped_lines = []
-    with open(rule) as f:
-        lines = f.readlines()
-        for line in lines:
-            stripped_line = line.strip()                                                            # strip lines to work with strings
-            stripped_lines.append(stripped_line)
-    return [lines, stripped_lines]
-    
+from track_changes import *
+
 def get_ranges(headers, io):                                                                        # get index from header to next header
     start_idx = [x[1] + 1 for x in headers if io == x[0]][0]                               
     end_idx = headers[[headers.index(x) + 1 for x in headers if io == x[0]][0]][1]         
     range_idxs = range(start_idx, end_idx)
     return range_idxs
-    
-def get_input_output(rules_paths, rules_basenames):
-    import re
-    input_pool = set()                                                                              # initialize input set
-    output_pool = set()                                                                             # initialize output set
-    rules_dic = {}
-    for idx in range(len(rules_paths)):                                                             # scan rulesDir
-        rule_path = rules_paths[idx]
-        rule_basename = rules_basenames[idx]
-        lines, stripped_lines = parse_input(rule_path)
-        headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                 
-        input_output = ["output:","input:"]                                                     
-        input_output_dic = {}
-        for io in input_output:
-            input_output_dic[io] = []                                                               # each rule starts with empty io
-            if io in [x[0] for x in headers]:                                                        
-                range_idxs = get_ranges(headers, io)                                        
-                for idx in range_idxs:
-                    to_append = re.sub(r"(.*?)=", "", stripped_lines[idx]).replace(",", "")         # remove variable assignment
-                    input_output_dic[io].append(to_append)
-                    if io == "input:":
-                        input_pool.add(to_append)                                                   # add everything to io pool
-                    else:
-                        output_pool.add(to_append)
-        rules_dic[rule_basename] = input_output_dic
-    return([input_pool, output_pool, rules_dic])
-    
-def sort_dependencies(rule_basename, dic, rules_dic, dependency_chain):
-    dependency_chain.append(rule_basename)
-    current_outputs = dic["output:"]
-    dependencies = [k for k,v in rules_dic.items() for x in v["input:"] if x in current_outputs]    # recursively look for a rule with input = to other rule output
-    if len(dependencies) == 0:
-        return dependency_chain
-    else:
-        return sort_dependencies(dependencies[0], rules_dic[dependencies[0]], rules_dic, dependency_chain)
-
-    
-def track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound):
-    input_pool, output_pool, rules_dic = get_input_output(rules_paths, rules_basenames)
-    dependency_chain = []
-    if upperBound == []:
-        return rules_basenames
-    else:
-        starting_rules = {rule:dependencies for rule,dependencies in rules_dic.items() if rule == upperBound}
-    for rulename, dic in starting_rules.items():
-        dependency_chain = sort_dependencies(rulename, dic, rules_dic, dependency_chain)
-        if lowerBound == []:
-            return dependency_chain[:]
-        else:
-            return dependency_chain[:(dependency_chain.index(lowerBound)+1)]
-    
+        
 def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, verbose, **diffs):
     headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                     # get headers of snakemake rule, list of tuples with (name, index)
     input_output_log = ["output:","input:", "log:"]                                                 # define input, output, log headers
@@ -156,7 +99,8 @@ def modify_line(string, category, verbose, diffs):
     elif category == "modify_filename":
         old = diffs["oldName"]
         new = diffs["newName"]
-        string_new = string.replace(old, new)
+        new_validated = track_changes(old, new)
+        string_new = string.replace(old, new_validated)
         if verbose:
             if string != string_new:
                 print(f'[log: << {string} ]')
@@ -171,11 +115,5 @@ def update_lines(lines, input_output_log_dic):
         else:
             lines_copy[idx] = lines[idx]
     return lines_copy
-    
-def write_rule(lines_updated, outputDir, ruleName):                                             
-    outputPath = outputDir + ruleName                                                           # define path to write new rule
-    with open(outputPath, "w") as f:                                                       
-        for line in lines_updated:
-            f.write(line)
             
 # TODO: handle exceptions
