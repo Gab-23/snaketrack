@@ -1,13 +1,13 @@
 rule filter_counts:
 	output:
-		counts="resources/RNA/kallisto_counts_{minCount_expr}_{minSamples_expr}.tsv",
-		TxIDs="resources/TxIDs/TxIDs_{minCount_expr}_{minSamples_expr}"
+		counts="resources/RNA/{gioppino3}_kallisto_counts_{minCount_expr}_{minSamples_expr}.tsv",
+		TxIDs="resources/TxIDs/{gioppino3}_TxIDs_{minCount_expr}_{minSamples_expr}"
 	input:
-		"resources/RNA/kallisto_counts.tsv"
+		"resources/RNA/{gioppino3}_kallisto_counts.tsv"
 	conda:
 		"../envs/r_get_transcriptome.yml"
 	log:
-		"logs/filter_counts/filter_counts_{minCount_expr}_{minSamples_expr}.log"
+		"logs/filter_counts/{gioppino3}_filter_counts_{minCount_expr}_{minSamples_expr}.log"
 	shell:
         	"""
 		Rscript workflow/scripts/filter_counts_new.R \

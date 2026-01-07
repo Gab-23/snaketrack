@@ -32,6 +32,12 @@ upperBound = [] if args.upperBound == None else args.upperBound
 
 verbose = args.verbose
 
+bool_category = category == "modify_filename"
+bool_bounds = (lowerBound != [] or upperBound != [])
+
+if bool_category and bool_bounds:
+    raise KeyError(f"Cannot specify --lowerBound AND / OR --upperBound when --change is {category}")
+
 dependencies = track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound)
 for idx in range(len(dependencies)):
     dependency_path = args.rulesDir + dependencies[idx]
@@ -56,7 +62,4 @@ new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, uppe
 exit_code = 1 - (dependencies == new_dependencies)
 exit(exit_code)
 
-
-#TODO: improve logic with simple name substitution
-#      no dependency tracking in that case, no need for boundaries
 #      handle arguments
