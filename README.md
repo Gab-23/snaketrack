@@ -1,9 +1,10 @@
 ![image](snaketrack_logo.png)
 
-Welcome to Snaketrack!
+# Welcome to Snaketrack!
+
 Snaketrack is a python-based tool to track and propagate changes to filenames in snakemake DAGs and to refactor the filenames structure
 
-Functionalities:
+## Functionalities:
 - Propagate the addition, removal or modification of wildcards in a snakemake DAG
 - Safely modify filenames without breakage of wildcards
 
@@ -13,7 +14,7 @@ Functionalities:
   - Sorting wildcards alphabetically
   - Keeping filenames tidy and wildcards only
 
-How to Install:
+## How to Install:
 
-How to Use:
+## How to Use:
 
