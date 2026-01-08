@@ -15,6 +15,7 @@ def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, ve
             range_idxs = get_ranges(headers, iol)                                                   # define range of lines where filenames are
             if len(range_idxs) > 1 and iol == "input:":                                             # if there is more than one input
                 for idx in range_idxs:                                                              # iterate
+                    # here, if upperBound is not specified, then do not consider branch matching
                     if any([x in stripped_lines[idx] for x in list(prev_input_output_dic.values())[0]["output:"]]):
                         modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
                         input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"
@@ -39,7 +40,7 @@ def is_wildcard(diff):
     bool_1 = type(diff) == str
     bool_2 = diff[0] == "{"
     bool_3 = diff[-1] == "}"
-    bool_4 = diff.count("{") == 1
+    bool_4 = diff.count("{") == 1                                                                                   # modify here, should be max {{}}
     bool_5 = diff.count("}") == 1
     bool_6 = '"' not in diff
     if bool_1 and bool_2 and bool_3 and bool_4 and bool_5 and bool_6:
@@ -115,5 +116,3 @@ def update_lines(lines, input_output_log_dic):
         else:
             lines_copy[idx] = lines[idx]
     return lines_copy
-            
-# TODO: handle exceptions

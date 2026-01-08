@@ -3,7 +3,7 @@ rule filter_selected_TxIDs:
 		"resources/TxIDs/{gioppino3}_{minCount_expr}_{minSamples_expr}_f_selected_TxIDs"
 	input:
 		selected_TxIDs=config["selected_txIDs_location"][0],
-		kallisto_TxIDs="resources/TxIDs/{gioppino3}_TxIDs_{minCount_expr}_{minSamples_expr}"
+		kallisto_TxIDs="resources/TxIDs/TxIDs_{minCount_expr}_{minSamples_expr}"
 	conda:
 		"../envs/r_CpGs.yml"
 	log:

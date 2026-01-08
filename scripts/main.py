@@ -32,11 +32,16 @@ upperBound = [] if args.upperBound == None else args.upperBound
 
 verbose = args.verbose
 
-bool_category = category == "modify_filename"
-bool_bounds = (lowerBound != [] or upperBound != [])
+bool_category_filename = category == "modify_filename"
+bool_existing_bounds = (lowerBound != [] or upperBound != [])
 
-if bool_category and bool_bounds:
+if bool_category_filename and bool_existing_bounds:
     raise KeyError(f"Cannot specify --lowerBound AND / OR --upperBound when --change is {category}")
+    
+bool_mismatching_bounds = ((lowerBound == [] and upperBound != []) or (upperBound == [] and lowerBound != []))
+
+if bool_mismatching_bounds:
+    raise KeyError(f"Cannot specify --lowerBound without specifying --upperBound and viceversa")
 
 dependencies = track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound)
 for idx in range(len(dependencies)):
@@ -62,4 +67,19 @@ new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, uppe
 exit_code = 1 - (dependencies == new_dependencies)
 exit(exit_code)
 
+# TODO: 
+#      handle exceptions
 #      handle arguments
+#      {{}} can be wildcards too
+
+# for sort dag and refactor dag: 
+#   reuse these functions to detect wildcards and to track changes
+#   define the string as a class
+#   class DependencyString
+#       contains: 
+#             wc ranges
+#             non wc ranges
+#             function to convert
+#             function to sort
+#             function to refactor
+#             function to add, modify and remove in class

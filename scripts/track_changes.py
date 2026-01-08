@@ -99,15 +99,3 @@ def track_changes(oldName, newName):
             if bool_opening or bool_closing:
                 raise ValueError(f"Broken wildcard detected in {comp_string}")
     return newName
-        
-# for sort dag and refactor dag: 
-#   reuse these functions to detect wildcards and to track changes
-#   define the string as a class
-#   class DependencyString
-#       contains: 
-            # wc ranges
-            # non wc ranges
-            # function to convert
-            # function to sort
-            # function to refactor
-            # function to add, modify and remove in class
