@@ -1,7 +1,7 @@
 def identify_wildcards(values, ranges, cumulative_idx = 0):
     not_bool_opening = "{" not in values
     not_bool_closing = "}" not in values
-    if not_bool_opening and not_bool_closing:
+    if not_bool_opening or not_bool_closing:
         return ranges
     else:
         opening = values.index("{")

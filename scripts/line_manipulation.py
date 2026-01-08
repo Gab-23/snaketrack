@@ -6,16 +6,15 @@ def get_ranges(headers, io):                                                    
     range_idxs = range(start_idx, end_idx)
     return range_idxs
         
-def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, verbose, **diffs):
+def get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, upperBound, verbose, **diffs):
     headers = [(x,stripped_lines.index(x)) for x in stripped_lines if ":" in x]                     # get headers of snakemake rule, list of tuples with (name, index)
     input_output_log = ["output:","input:", "log:"]                                                 # define input, output, log headers
     input_output_log_dic = {}                                                                       # initialize empty dict
     for iol in input_output_log:                                                                    # for each iol header
         if iol in [x[0] for x in headers]:                                                          # some rules might miss some of these headers
             range_idxs = get_ranges(headers, iol)                                                   # define range of lines where filenames are
-            if len(range_idxs) > 1 and iol == "input:":                                             # if there is more than one input
+            if len(range_idxs) > 1 and iol == "input:" and upperBound != []:                        # if there is more than one input and upperBound is specified
                 for idx in range_idxs:                                                              # iterate
-                    # here, if upperBound is not specified, then do not consider branch matching
                     if any([x in stripped_lines[idx] for x in list(prev_input_output_dic.values())[0]["output:"]]):
                         modified_line = modify_line(stripped_lines[idx], category, verbose, diffs)
                         input_output_log_dic[idx] = "\t" + "\t" + modified_line + "\n"

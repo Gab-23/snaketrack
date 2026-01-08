@@ -32,16 +32,41 @@ upperBound = [] if args.upperBound == None else args.upperBound
 
 verbose = args.verbose
 
-bool_category_filename = category == "modify_filename"
-bool_existing_bounds = (lowerBound != [] or upperBound != [])
-
-if bool_category_filename and bool_existing_bounds:
-    raise KeyError(f"Cannot specify --lowerBound AND / OR --upperBound when --change is {category}")
-    
 bool_mismatching_bounds = ((lowerBound == [] and upperBound != []) or (upperBound == [] and lowerBound != []))
+bool_category_modify_filename = category == "modify_filename"
+bool_category_add_wildcard = category == "add_wildcard"
+bool_category_remove_wildcard = category == "remove_wildcard"
+bool_category_modify_wildcard = category == "modify_wildcard"
+bool_existing_lowerBound = lowerBound != []
+bool_existing_upperBound = upperBound != []
+bool_existing_oldName = oldName != []
+bool_existing_newName = newName != []
+bool_existing_oldPattern = oldPattern != []
+bool_existing_newPattern = newPattern != []
 
 if bool_mismatching_bounds:
     raise KeyError(f"Cannot specify --lowerBound without specifying --upperBound and viceversa")
+
+if bool_category_modify_filename and (bool_existing_lowerBound or bool_existing_upperBound):
+    raise KeyError(f"Cannot specify --lowerBound AND / OR --upperBound when --change is {category}")
+    
+if bool_category_modify_filename and (not bool_existing_oldName or not bool_existing_newName):
+    raise KeyError(f"Must specify --oldName AND --newName when --change is {category}")
+    
+if bool_category_modify_filename and (bool_existing_oldPattern or bool_existing_newPattern):
+    raise KeyError(f"Must specify NEITHER --oldPattern NOR --newPattern when --change is {category}")
+    
+if bool_category_add_wildcard and (not bool_existing_newPattern or bool_existing_oldPattern):
+    raise KeyError(f"Must specify ONLY --newPattern when --change is {category}")
+
+if bool_category_remove_wildcard and (not bool_existing_oldPattern or bool_existing_newPattern):
+    raise KeyError(f"Must specify ONLY --oldPattern when --change is {category}")
+    
+if bool_category_modify_wildcard and not (bool_existing_oldPattern and bool_existing_newPattern):
+    raise KeyError(f"Must specify --oldPattern AND --newPattern when --change is {category}")
+    
+if (bool_category_add_wildcard or bool_category_remove_wildcard or bool_category_modify_wildcard) and (bool_existing_oldName or bool_existing_newName):
+    raise KeyError(f"Must specify NEITHER --oldName NOR --newName when --change is {category}")
 
 dependencies = track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound)
 for idx in range(len(dependencies)):
@@ -56,7 +81,7 @@ for idx in range(len(dependencies)):
         prev_input_output_dic = get_input_output([prev_dependency_path], [prev_dependency_basename])[2]
     else:
         prev_input_output_dic = None
-    input_output_log_dic = get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, verbose, 
+    input_output_log_dic = get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, upperBound, verbose, 
                                                     oldPattern = oldPattern, newPattern = newPattern, oldName = oldName, newName = newName)
     lines_updated = update_lines(lines, input_output_log_dic)
     write_rule(lines_updated, args.outputDir, dependency_basename)
@@ -69,7 +94,6 @@ exit(exit_code)
 
 # TODO: 
 #      handle exceptions
-#      handle arguments
 #      {{}} can be wildcards too
 
 # for sort dag and refactor dag: 
