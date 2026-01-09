@@ -12,6 +12,10 @@ Snaketrack is a python-based tool to track and propagate changes to filenames in
 
 ## How to Install:
 
+```
+git clone https://github.com/Gab-23/snaketrack.git
+```
+
 ## How to Use:
 
 The general structure of a snaketrack command is the following:
