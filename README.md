@@ -17,7 +17,7 @@ Snaketrack is a python-based tool to track and propagate changes to filenames in
 The general structure of a snaketrack command is the following:
 
 ```
-python3 scripts/main.py \ 
+python scripts/main.py \ 
     --rulesDir rulesDir \
     --outputDir outputDir \ 
     --category category \
@@ -42,7 +42,7 @@ Where:
 You can choose among 4 different categories:
 - **add_wildcard**
 ```
-python3 scripts/main.py \ 
+python scripts/main.py \ 
     --rulesDir rulesDir \
     --outputDir outputDir \            
     --category add_wildcard \
@@ -53,7 +53,7 @@ python3 scripts/main.py \
 ```
 - **remove_wildcard**
 ```
-python3 scripts/main.py \ 
+python scripts/main.py \ 
     --rulesDir rulesDir \
     --outputDir outputDir \            
     --category remove_wildcard \
@@ -64,7 +64,7 @@ python3 scripts/main.py \
 ```
 - **modify_wildcard**
 ```
-python3 scripts/main.py \ 
+python scripts/main.py \ 
     --rulesDir rulesDir \
     --outputDir outputDir \            
     --category modify_wildcard \
@@ -76,7 +76,7 @@ python3 scripts/main.py \
 ```
 - **modify_filename**
 ```
-python3 scripts/main.py \ 
+python scripts/main.py \ 
     --rulesDir rulesDir \
     --outputDir outputDir \            
     --category modify_filename \
@@ -84,7 +84,3 @@ python3 scripts/main.py \
     --newName newName \
     [--verbose]
 ```
-
-
-
-
