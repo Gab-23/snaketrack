@@ -19,8 +19,6 @@ parser.add_argument('--verbose',       dest='verbose',                          
 
 args = parser.parse_args()
 
-rules_basenames = os.listdir(args.rulesDir)
-rules_paths = [args.rulesDir + x for x in rules_basenames]
 category = args.change
 
 oldPattern = [] if args.oldPattern == None else args.oldPattern
@@ -44,6 +42,7 @@ bool_existing_newName = newName != []
 bool_existing_oldPattern = oldPattern != []
 bool_existing_newPattern = newPattern != []
 
+# define exceptions related to arguments
 if bool_mismatching_bounds:
     raise KeyError(f"Cannot specify --lowerBound without specifying --upperBound and viceversa")
 
@@ -68,12 +67,24 @@ if bool_category_modify_wildcard and not (bool_existing_oldPattern and bool_exis
 if (bool_category_add_wildcard or bool_category_remove_wildcard or bool_category_modify_wildcard) and (bool_existing_oldName or bool_existing_newName):
     raise KeyError(f"Must specify NEITHER --oldName NOR --newName when --change is {category}")
 
+# handle IO directories
+if not os.path.isdir(args.rulesDir):
+    raise NameError(f"{args.rulesDir} does not exist")
+
+if not os.path.isdir(args.outputDir):
+    if verbose:
+        print(f"[log: Creating {args.outputDir}]")
+    os.makedirs(args.outputDir)
+    
+rules_basenames = os.listdir(args.rulesDir)
+rules_paths = [args.rulesDir + x for x in rules_basenames]
 dependencies = track_dependencies(rules_paths, rules_basenames, upperBound, lowerBound)
+
 for idx in range(len(dependencies)):
     dependency_path = args.rulesDir + dependencies[idx]
     dependency_basename = dependencies[idx]
     if verbose:
-        print(f'[log: Processing {dependency_basename} ]')
+        print(f"[log: Processing {dependency_basename} ]")
     lines, stripped_lines = parse_input(dependency_path)
     if idx > 0:
         prev_dependency_path = args.rulesDir + dependencies[idx-1]
@@ -82,19 +93,21 @@ for idx in range(len(dependencies)):
     else:
         prev_input_output_dic = None
     input_output_log_dic = get_input_output_log_dic(stripped_lines, category, prev_input_output_dic, upperBound, verbose, 
-                                                    oldPattern = oldPattern, newPattern = newPattern, oldName = oldName, newName = newName)
+                                                    oldPattern = oldPattern, newPattern = newPattern, 
+                                                    oldName = oldName, newName = newName)
     lines_updated = update_lines(lines, input_output_log_dic)
     write_rule(lines_updated, args.outputDir, dependency_basename)
 
 new_rules_basenames = os.listdir(args.outputDir)
 new_rules_paths = [args.outputDir + x for x in rules_basenames]
 new_dependencies = track_dependencies(new_rules_paths, new_rules_basenames, upperBound, lowerBound)
+
 exit_code = 1 - (dependencies == new_dependencies)
 exit(exit_code)
 
 # TODO: 
-#      handle exceptions
-#      {{}} can be wildcards too
+#    {{}} can be wildcards too
+#    unittest
 
 # for sort dag and refactor dag: 
 #   reuse these functions to detect wildcards and to track changes

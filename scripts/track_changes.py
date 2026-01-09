@@ -49,13 +49,13 @@ def track_changes(oldName, newName):
     categories = []
     diffs_list = []
     if len(ranges) > 0: 
-        for range in ranges:                                                        # iterate over them
+        for range in ranges:                                                    # iterate over them
             diffs = {}
             types_subset = types[range[0]:range[1]]
             values_subset = values[range[0]:range[1]]
             old = "".join([values_subset[idx] for idx,elem in enumerate(types_subset) if elem == " " or elem == "-"])
             new = "".join([values_subset[idx] for idx,elem in enumerate(types_subset) if elem == " " or elem == "+"])
-            unique_changes = set(types_subset)                                      # take the unique set of changes
+            unique_changes = set(types_subset)                                  # take the unique set of changes
             bool_add = "+" in unique_changes
             bool_remove = "-" in unique_changes
             if  bool_add and bool_remove:
