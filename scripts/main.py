@@ -8,7 +8,7 @@ from line_manipulation import *
 parser = argparse.ArgumentParser()  
 parser.add_argument('--rulesDir',      dest='rulesDir',                      required=True,                  type=str,    help='Add rulesDir')
 parser.add_argument('--outputDir',     dest='outputDir',                     required=True,                  type=str,    help='Add outputDir')
-parser.add_argument('--change',        dest='change',                                                        type=str,    help='Add change')
+parser.add_argument('--category',      dest='category',                      required=True,                  type=str,    help='Add category')
 parser.add_argument('--oldPattern',    dest='oldPattern',    nargs = "*",                                    type=str,    help='Add oldPattern')
 parser.add_argument('--newPattern',    dest='newPattern',    nargs = "*",                                    type=str,    help='Add newPattern')
 parser.add_argument('--oldName',       dest='oldName',       nargs = "?",                                    type=str,    help='Add oldName')
@@ -19,7 +19,7 @@ parser.add_argument('--verbose',       dest='verbose',                          
 
 args = parser.parse_args()
 
-category = args.change
+category = args.category
 
 oldPattern = [] if args.oldPattern == None else args.oldPattern
 newPattern = [] if args.newPattern == None else args.newPattern
